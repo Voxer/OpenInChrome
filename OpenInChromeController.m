@@ -54,37 +54,36 @@ static NSString * const kGoogleChromeHTTPSScheme = @"googlechromes:";
   return [[UIApplication sharedApplication] canOpenURL:simpleURL];
 }
 
-- (BOOL)openInChrome:(NSURL *)url {
-  if ([self isChromeInstalled]) {
-    NSString *scheme = [url.scheme lowercaseString];
-    // Replace the URL Scheme with the Chrome equivalent.
-    NSString *chromeScheme = nil;
-    if ([scheme isEqualToString:@"http"]) {
-      chromeScheme = kGoogleChromeHTTPScheme;
-    } else if ([scheme isEqualToString:@"https"]) {
-      chromeScheme = kGoogleChromeHTTPSScheme;
+- (void)openInChrome:(NSURL *)url {
+    if ([self isChromeInstalled]) {
+        NSString *scheme = [url.scheme lowercaseString];
+        // Replace the URL Scheme with the Chrome equivalent.
+        NSString *chromeScheme = nil;
+        if ([scheme isEqualToString:@"http"]) {
+            chromeScheme = kGoogleChromeHTTPScheme;
+        } else if ([scheme isEqualToString:@"https"]) {
+            chromeScheme = kGoogleChromeHTTPSScheme;
+        }
+        
+        // Proceed only if a valid Google Chrome URI Scheme is available.
+        if (chromeScheme) {
+            NSString *absoluteString = [url absoluteString];
+            NSRange rangeForScheme = [absoluteString rangeOfString:@":"];
+            NSString *urlNoScheme =
+            [absoluteString substringFromIndex:rangeForScheme.location + 1];
+            NSString *chromeURLString =
+            [chromeScheme stringByAppendingString:urlNoScheme];
+            NSURL *chromeURL = [NSURL URLWithString:chromeURLString];
+            // Open the URL with Google Chrome.
+            [[UIApplication sharedApplication] openURL:chromeURL options:@{} completionHandler:nil];
+        }
     }
-
-    // Proceed only if a valid Google Chrome URI Scheme is available.
-    if (chromeScheme) {
-      NSString *absoluteString = [url absoluteString];
-      NSRange rangeForScheme = [absoluteString rangeOfString:@":"];
-      NSString *urlNoScheme =
-          [absoluteString substringFromIndex:rangeForScheme.location + 1];
-      NSString *chromeURLString =
-          [chromeScheme stringByAppendingString:urlNoScheme];
-      NSURL *chromeURL = [NSURL URLWithString:chromeURLString];
-      // Open the URL with Google Chrome.
-      return [[UIApplication sharedApplication] openURL:chromeURL];
-    }
-  }
-  return NO;
 }
 
-- (BOOL)openInChrome:(NSURL *)url
+- (void)openInChrome:(NSURL *)url
      withCallbackURL:(NSURL *)callbackURL
         createNewTab:(BOOL)createNewTab {
-  // This deprecated API simply calls the supported -openInChrome: API.
-  return [self openInChrome:url];
+    // This deprecated API simply calls the supported -openInChrome: API.
+    [self openInChrome:url];
 }
 @end
